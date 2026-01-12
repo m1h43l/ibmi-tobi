@@ -1109,7 +1109,7 @@ define CMDSRC_TO_CMD_RECIPE =
 	$(eval d = $($@_d))
 	@$(call echo_cmd,"=== Creating command [$(notdir $<)] in $(call ESCAPE_FOR_RECIPE,$(OBJLIB))")
 	$(eval crtcmd := CRTCMD CMD($(call ESCAPE_FOR_RECIPE,$(OBJLIB))/$(basename $(@F))) \
-        srcstmf('$<') PGM($(call ESCAPE_FOR_RECIPE,$(OBJLIB))) $(CRTCMDFLAGS))
+        srcstmf('$<') PGM($(call ESCAPE_FOR_RECIPE,$(OBJLIB)/$(CMD_PGM))) $(CRTCMDFLAGS))
 	@$(PRESETUP) \
 	$(SCRIPTSPATH)/launch "$(JOBLOGFILE)" "$(crtcmd)" "$(PRECMD)" "$(POSTCMD)" "$(notdir $@)" "$<" $(logFile)> $(logFile) 2>&1 && $(call logSuccess,$@) || $(call logFail,$@);
 endef
@@ -1122,7 +1122,7 @@ define CMD_TO_CMD_RECIPE =
 	$(eval VLDCKR = $(CMD_VLDCKR))
 	$(eval d = $($@_d))
 	@$(call echo_cmd,"=== Creating command [$(notdir $<)] in $(call ESCAPE_FOR_RECIPE,$(OBJLIB))")
-	$(eval crtcmd := CRTCMD CMD($(call ESCAPE_FOR_RECIPE,$(OBJLIB))/$(basename $(@F))) srcstmf('$<') PGM($(call ESCAPE_FOR_RECIPE,$(OBJLIB))) $(CRTCMDFLAGS))
+	$(eval crtcmd := CRTCMD CMD($(call ESCAPE_FOR_RECIPE,$(OBJLIB))/$(basename $(@F))) srcstmf('$<') PGM($(call ESCAPE_FOR_RECIPE,$(OBJLIB)/$(CMD_PGM))) $(CRTCMDFLAGS))
 	@$(PRESETUP) \
 	$(SCRIPTSPATH)/launch "$(JOBLOGFILE)" "$(crtcmd)" "$(PRECMD)" "$(POSTCMD)" "$(notdir $@)" "$<" $(logFile)> $(logFile) 2>&1 && $(call logSuccess,$@) || $(call logFail,$@);
 endef
