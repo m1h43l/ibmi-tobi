@@ -45,7 +45,7 @@ jobs:
               name: ibmi-company_system,
               lib: CURLIB,
               directory: qrpglesrc,
-              file: mypgm.pgm.rpgle,
+              file: MYPGM.PGM.RPGLE,
               firstBuild: "0 failed 15 succeed 15 total",
               secondBuild: "0 failed 1 succeed 1 total",
               firstCompile: "0 failed 1 succeed 1 total",
