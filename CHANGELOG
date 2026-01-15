@@ -1,3 +1,4 @@
+- Fixed source name case sensitivity in `makei compile` and `rules.mk`
 - Added support for building SYSTRG sources as TRG objects instead of PGM objects 
   for `makei c` command.
 * Tue Dec 16 2025 Het Patel <het.patel@ibm.com> - 3.1.0
