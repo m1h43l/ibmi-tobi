@@ -160,9 +160,10 @@ def test_library_with_hash_max_length():
 def test_curlib_with_hash():
     """Test current library with # character"""
     curlib = "CURRENT#LIB"
+    escaped_curlib = curlib.replace('#', '\\#')
     path = objlib_to_path(curlib)
     
-    assert path == f"/QSYS.LIB/{curlib.replace('#','\\#')}.LIB"
+    assert path == f"/QSYS.LIB/{escaped_curlib}.LIB"
 
 
 def test_library_with_hash_in_compile_command():
