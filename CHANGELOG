@@ -1,5 +1,8 @@
+* Fri Jan 23 2026 Het Patel <het.patel@ibm.com> - 3.1.1
 - Added to escape library names containing the # symbol.
 - Fixed source name case sensitivity in `makei compile` and `rules.mk`
+- Renamed references of bob to tobi
+- Renamed bob-recursive-examples to tobi-examples
 - Added support for building SYSTRG sources as TRG objects instead of PGM objects 
   for `makei c` command.
 * Tue Dec 16 2025 Het Patel <het.patel@ibm.com> - 3.1.0
