@@ -4,7 +4,7 @@
 
 ```
 usage: crtfrmstmf [-h] -f <srcstmf> -o <object> [-l <library>] -c <cmd> [-p [<parms>]] [--ccsid [<ccsid>]]
-                  [--save-joblog <path to joblog json file>]
+                  [--save-joblog <path to joblog json file>] [--iasp <IASP name>]
 ```
 
 ## Options
@@ -42,3 +42,6 @@ usage: crtfrmstmf [-h] -f <srcstmf> -o <object> [-l <library>] -c <cmd> [-p [<pa
 
   Output the joblog to the specified json file.
 
+- **--iasp**
+
+  IASP device name (leave empty for *SYSBAS)
