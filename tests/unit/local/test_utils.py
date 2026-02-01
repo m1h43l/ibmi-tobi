@@ -315,7 +315,8 @@ def test_objlib_to_path_with_iasp_and_hash():
     path = objlib_to_path(lib, iasp=iasp)
     
     # Should escape # and include IASP prefix
-    assert path == f"/{iasp}/QSYS.LIB/{lib.replace('#', '\\#')}.LIB"
+    escaped_lib = lib.replace('#', '\\#')
+    assert path == f"/{iasp}/QSYS.LIB/{escaped_lib}.LIB"
     assert iasp in path
     assert "\\#" in path
 
