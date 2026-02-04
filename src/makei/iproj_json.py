@@ -120,21 +120,9 @@ class IProjJson:
         )
         # Both iasp and SETASPGRP must be set together, or both must be empty
         iasp_is_set = bool(self.iasp)
-        if iasp_is_set and not has_setaspgrp:
-            # IASP is set but SETASPGRP is missing
+        if iasp_is_set != has_setaspgrp:
             error_msg = (
-                f"IASP '{self.iasp}' is configured but 'setIBMiEnvCmd' does not contain "
-                f"a SETASPGRP command.\n"
-                f"Please add a command like: SETASPGRP ASPGRP({self.iasp})"
-            )
-            print(colored(error_msg, Colors.FAIL))
-            sys.exit(1)
-        elif not iasp_is_set and has_setaspgrp:
-            # SETASPGRP is set but IASP is missing
-            error_msg = (
-                "'setIBMiEnvCmd' contains a SETASPGRP command but 'iasp' is not configured.\n"
-                "Please set the 'iasp' field in iproj.json or remove the SETASPGRP command."
-            )
+                "Both IASP name and SETASPGRP cmd should be configured in iproj.json")
             print(colored(error_msg, Colors.FAIL))
             sys.exit(1)
 

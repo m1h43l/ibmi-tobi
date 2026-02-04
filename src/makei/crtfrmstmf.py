@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from makei.ibm_job import IBMJob, save_joblog_json
-from makei.utils import format_datetime, objlib_to_path, validate_ccsid, make_include_dirs_absolute
+from makei.utils import format_datetime, objlib_to_path, validate_ccsid, make_include_dirs_absolute, get_iasp_prefix
 
 COMMAND_MAP = {'CRTCMD': 'CMD',
                'CRTBNDCL': 'PGM',
@@ -71,10 +71,7 @@ class CrtFrmStmf():
         self.precmd = precmd
         self.postcmd = postcmd
         self.output = output
-        if "iasp" in self.env_settings and self.env_settings["iasp"]:
-            self.iasp = self.env_settings["iasp"]
-        else:
-            self.iasp = ""
+        self.iasp = iasp if iasp else ""
         self.tmp_lib = resolve_tmp_lib(self.lib, self.iasp)
         if tgt_ccsid is None or not validate_ccsid(tgt_ccsid):
             ccsid = retrieve_ccsid(srcstmf)
@@ -105,7 +102,7 @@ class CrtFrmStmf():
         self.setup_env()
 
         run_datetime = datetime.now()
-        iasp_prefix = f"/{self.iasp}" if self.iasp else ""
+        iasp_prefix = get_iasp_prefix(self.iasp)
         # Run the pre_cmd
         if self.precmd:
             self.job.run_cl(self.precmd, False, True)
@@ -155,9 +152,10 @@ class CrtFrmStmf():
 
     def setup_env(self):
 
-        # if "IBMiEnvCmd" in self.env_settings and self.env_settings["IBMiEnvCmd"]:
-        #     for cmd in self.env_settings["IBMiEnvCmd"].split("\\n"):
-        #         self.job.run_cl(cmd, log=True)
+        if "IBMiEnvCmd" in self.env_settings and self.env_settings["IBMiEnvCmd"]:
+            for cmd in self.env_settings["IBMiEnvCmd"].split("\\n"):
+                if "SETASPGRP" not in cmd.upper():
+                    self.job.run_cl(cmd, log=True)
 
         if "curlib" in self.env_settings and self.env_settings["curlib"]:
             # self.job.run_cl("SETASPGRP ASPGRP(IASP1)", log=True)
@@ -330,12 +328,6 @@ def cli():
         "--output",
         metavar='<output>',
     )
-    parser.add_argument(
-        "--iasp",
-        help='IASP device name (leave empty for *SYSBAS)',
-        metavar='<iasp>',
-        default=""
-    )
 
     args = parser.parse_args()
     srcstmf_absolute_path = str(Path(args.stream_file.strip()).resolve())
@@ -351,10 +343,11 @@ def cli():
     if "iasp" in os.environ:
         env_settings["iasp"] = sanitize_lib_envvar(os.environ["iasp"])
 
+    iasp_name = env_settings.get("iasp", "")
     handle = CrtFrmStmf(srcstmf_absolute_path, args.object.strip(),
                         args.library.strip(), args.command.strip(), args.rcdlen, args.ccsid,
                         args.parameters, env_settings, args.save_joblog, precmd=args.precmd,
-                        postcmd=args.postcmd, output=args.output, iasp=args.iasp)
+                        postcmd=args.postcmd, output=args.output, iasp=iasp_name)
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     success = handle.run()
     print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
@@ -391,7 +384,7 @@ def retrieve_ccsid(srcstmf: str) -> str:
 
 
 def check_object_exists(obj: str, lib: str, obj_type: str, iasp: str = "") -> bool:
-    iasp_prefix = f"/{iasp}" if iasp else ""
+    iasp_prefix = get_iasp_prefix(iasp)
     obj_path = Path(f"{iasp_prefix}/QSYS.LIB/{lib}.LIB/{obj}.{obj_type}")
     return obj_path.exists()
 
@@ -412,7 +405,7 @@ def get_physical_dependencies(obj: str, lib: str, include_self: bool, job: Optio
     Returns:
         List[Tuple[str, str, str]]: List of (obj, lib, obj_type) tuples
     """
-    iasp_prefix = f"/{iasp}" if iasp else ""
+    iasp_prefix = get_iasp_prefix(iasp)
     lib_path = Path(f'{iasp_prefix}/QSYS.LIB/{lib}.LIB')
     pf_path = lib_path / f"{obj}.FILE"
     if not pf_path.exists():

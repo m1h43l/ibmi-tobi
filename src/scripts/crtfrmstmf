@@ -4,7 +4,7 @@ SCRIPT_DIR="$(dirname "$0")"
 TOBI_DIR=$(realpath "${SCRIPT_DIR}/../..")
 IFS=$'\\n'
 echo "$IBMiEnvCmd"
-if [ ! -z "$IBMiEnvCmd" ]; then
+if [ ! -z "$IBMiEnvCmd" ] && echo "$IBMiEnvCmd" | grep -qi "SETASPGRP"; then
   for envcmd in $IBMiEnvCmd; do
     [[ ! -z "$envcmd" ]] && cl "$envcmd"
   done

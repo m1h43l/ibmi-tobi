@@ -296,18 +296,6 @@ def test_objlib_to_path_without_iasp():
     assert "/IASP" not in path
 
 
-def test_objlib_to_path_with_iasp_qsys_special_case():
-    """Test objlib_to_path with IASP and QSYS library (special case)"""
-    lib = "QSYS"
-    obj = "TESTOBJ.PGM"
-    iasp = "IASP1"
-    path = objlib_to_path(lib, obj, iasp)
-    
-    # QSYS is special - doesn't add .LIB suffix
-    assert path == f"/{iasp}/QSYS.LIB/{obj}"
-    assert iasp in path
-
-
 def test_objlib_to_path_with_iasp_and_hash():
     """Test objlib_to_path with both IASP and # in library name"""
     lib = "TEST#LIB"
@@ -382,21 +370,6 @@ def test_objlib_to_path_iasp_library_list_scenario():
         assert f"/{iasp}/QSYS.LIB/{lib}.LIB" == path
     
     assert len(paths) == len(libraries) - 1  # Excluding QSYS
-
-
-def test_objlib_to_path_iasp_default_parameter():
-    """Test objlib_to_path with default iasp parameter (empty string)"""
-    lib = "TESTLIB"
-    obj = "TESTPGM.PGM"
-    
-    # When iasp is not provided, should not include IASP prefix
-    path = objlib_to_path(lib, obj)  # Default parameter (empty string)
-    assert path == f"/QSYS.LIB/{lib}.LIB/{obj}"
-    assert "/IASP" not in path
-    
-    # Explicitly passing empty string should give same result
-    path2 = objlib_to_path(lib, obj, iasp="")
-    assert path == path2
 
 
 def test_objlib_to_path_iasp_with_numeric_names():

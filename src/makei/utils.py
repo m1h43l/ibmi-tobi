@@ -113,7 +113,7 @@ def objlib_to_path(lib, object_name=None, iasp: str = "") -> str:
     >>> objlib_to_path("TONGKUN", "SAMREF.FILE")
     '/QSYS.LIB/TONGKUN.LIB/SAMREF.FILE'
     """
-    iasp_prefix = f"/{iasp}" if iasp else ""
+    iasp_prefix = get_iasp_prefix(iasp)
     if not lib:
         raise ValueError()
     if lib == "QSYS":
@@ -371,6 +371,10 @@ def make_include_dirs_absolute(job_log_path: str, parameters: str):
     start_of_param_string = parameters[0:start_of_inc_dir + 1]
     end_of_param_string = parameters[end_of_inc_dir:]
     return start_of_param_string + " ".join(include_path) + end_of_param_string
+
+
+def get_iasp_prefix(iasp: str) -> str:
+    return f"/{iasp}" if iasp else ""
 
 
 # Returns the line number where the keyword was found at (starting at 1), otherwise 0
