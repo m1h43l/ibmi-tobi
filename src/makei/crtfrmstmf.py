@@ -72,6 +72,7 @@ class CrtFrmStmf():
         self.postcmd = postcmd
         self.output = output
         self.iasp = iasp if iasp else ""
+        self.iasp_prefix = get_iasp_prefix(self.iasp)
         self.tmp_lib = resolve_tmp_lib(self.lib, self.iasp)
         if tgt_ccsid is None or not validate_ccsid(tgt_ccsid):
             ccsid = retrieve_ccsid(srcstmf)
@@ -102,7 +103,6 @@ class CrtFrmStmf():
         self.setup_env()
 
         run_datetime = datetime.now()
-        iasp_prefix = get_iasp_prefix(self.iasp)
         # Run the pre_cmd
         if self.precmd:
             self.job.run_cl(self.precmd, False, True)
@@ -115,7 +115,8 @@ class CrtFrmStmf():
         # Copy the source stream file to the temp source file
         self.job.run_cl(
             f'CPYFRMSTMF FROMSTMF("{self.srcstmf}") '
-            f'TOMBR("{iasp_prefix}/QSYS.LIB/{self.tmp_lib}.LIB/{self.tmp_src}.FILE/{self.obj}.MBR") MBROPT(*REPLACE)')
+            f'TOMBR("{self.iasp_prefix}/QSYS.LIB/{self.tmp_lib}.LIB/{self.tmp_src}.FILE/{self.obj}.MBR")'
+            f'MBROPT(*REPLACE)')
 
         self._backup_and_delete_objs()
 
@@ -152,13 +153,7 @@ class CrtFrmStmf():
 
     def setup_env(self):
 
-        if "IBMiEnvCmd" in self.env_settings and self.env_settings["IBMiEnvCmd"]:
-            for cmd in self.env_settings["IBMiEnvCmd"].split("\\n"):
-                if "SETASPGRP" not in cmd.upper():
-                    self.job.run_cl(cmd, log=True)
-
         if "curlib" in self.env_settings and self.env_settings["curlib"]:
-            # self.job.run_cl("SETASPGRP ASPGRP(IASP1)", log=True)
             self.job.run_cl(f"CHGCURLIB CURLIB({self.env_settings['curlib']})", log=True)
 
         if "preUsrlibl" in self.env_settings and self.env_settings["preUsrlibl"]:
@@ -168,6 +163,11 @@ class CrtFrmStmf():
         if "postUsrlibl" in self.env_settings and self.env_settings["postUsrlibl"]:
             for libl in self.env_settings["postUsrlibl"].split():
                 self.job.run_cl(f"ADDLIBLE LIB({libl}) POSITION(*LAST)", ignore_errors=True, log=True)
+
+        if "IBMiEnvCmd" in self.env_settings and self.env_settings["IBMiEnvCmd"]:
+            for cmd in self.env_settings["IBMiEnvCmd"].split("\\n"):
+                if "SETASPGRP" not in cmd.upper():
+                    self.job.run_cl(cmd, log=True)
 
     def _retrieve_current_library(self):
         records, _ = self.job.run_sql(
@@ -332,16 +332,16 @@ def cli():
     args = parser.parse_args()
     srcstmf_absolute_path = str(Path(args.stream_file.strip()).resolve())
     env_settings = {}
-    if "IBMiEnvCmd" in os.environ:
-        env_settings["IBMiEnvCmd"] = sanitize_lib_envvar(os.environ["IBMiEnvCmd"])
     if "curlib" in os.environ:
         env_settings["curlib"] = sanitize_lib_envvar(os.environ["curlib"])
     if "preUsrlibl" in os.environ:
         env_settings["preUsrlibl"] = sanitize_lib_envvar(os.environ["preUsrlibl"])
     if "postUsrlibl" in os.environ:
         env_settings["postUsrlibl"] = sanitize_lib_envvar(os.environ["postUsrlibl"])
+    if "IBMiEnvCmd" in os.environ:
+        env_settings["IBMiEnvCmd"] = os.environ["IBMiEnvCmd"]
     if "iasp" in os.environ:
-        env_settings["iasp"] = sanitize_lib_envvar(os.environ["iasp"])
+        env_settings["iasp"] = os.environ["iasp"]
 
     iasp_name = env_settings.get("iasp", "")
     handle = CrtFrmStmf(srcstmf_absolute_path, args.object.strip(),
