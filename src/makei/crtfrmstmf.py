@@ -115,7 +115,7 @@ class CrtFrmStmf():
         # Copy the source stream file to the temp source file
         self.job.run_cl(
             f'CPYFRMSTMF FROMSTMF("{self.srcstmf}") '
-            f'TOMBR("{self.iasp_prefix}/QSYS.LIB/{self.tmp_lib}.LIB/{self.tmp_src}.FILE/{self.obj}.MBR")'
+            f'TOMBR("{self.iasp_prefix}/QSYS.LIB/{self.tmp_lib}.LIB/{self.tmp_src}.FILE/{self.obj}.MBR") '
             f'MBROPT(*REPLACE)')
 
         self._backup_and_delete_objs()
