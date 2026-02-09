@@ -343,11 +343,10 @@ def cli():
     if "iasp" in os.environ:
         env_settings["iasp"] = os.environ["iasp"]
 
-    iasp_name = env_settings.get("iasp", "")
     handle = CrtFrmStmf(srcstmf_absolute_path, args.object.strip(),
                         args.library.strip(), args.command.strip(), args.rcdlen, args.ccsid,
                         args.parameters, env_settings, args.save_joblog, precmd=args.precmd,
-                        postcmd=args.postcmd, output=args.output, iasp=iasp_name)
+                        postcmd=args.postcmd, output=args.output, iasp=env_settings["iasp"])
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     success = handle.run()
     print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
