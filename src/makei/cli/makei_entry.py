@@ -10,7 +10,7 @@ from makei import __version__
 from makei import init_project
 from makei.build import BuildEnv
 from makei.cvtsrcpf import CvtSrcPf
-from makei.utils import Colors, colored, decompose_filename
+from makei.utils import Colors, colored
 from pathlib import Path
 
 
@@ -220,18 +220,16 @@ def handle_info(args):
         print(colored("Warning: --log has no effect on 'info' command.", Colors.WARNING))
     print("Not implemented!")
 
+
 def extract_subdirs_from_rules_mk(rules_mk_path):
     """Extract SUBDIRS list from a Rules.mk file."""
-    try:
-        with rules_mk_path.open("r") as f:
-            for line in f:
-                line_stripped = line.strip()
-                if line_stripped.startswith('SUBDIRS'):
-                    # Extract subdirs: "SUBDIRS = dir1 dir2" or "SUBDIRS := dir1 dir2"
-                    subdir_list = line_stripped.split('=', 1)[1].strip().split()
-                    return subdir_list
-    except Exception:
-        pass
+    with rules_mk_path.open("r") as f:
+        for line in f:
+            line_stripped = line.strip()
+            if line_stripped.startswith('SUBDIRS'):
+                # Extract subdirs: "SUBDIRS = dir1 dir2" or "SUBDIRS := dir1 dir2"
+                subdir_list = line_stripped.split('=', 1)[1].strip().split()
+                return subdir_list
     return []
 
 
@@ -260,10 +258,9 @@ def search_depth_first(current_dir, filename_upper):
     Fully explores each subdirectory before moving to the next sibling.
     """
     current_rules_mk = current_dir / "Rules.mk"
-    
     if not current_rules_mk.exists():
         return []
-    
+
     # Check current Rules.mk for targets matching the filename
     targets = parse_rules_mk_for_targets(
         current_rules_mk,
@@ -273,7 +270,7 @@ def search_depth_first(current_dir, filename_upper):
     )
     if targets:
         return targets  # Return immediately upon finding first match
-    
+
     # No match in current directory, search subdirectories depth-first
     subdir_list = extract_subdirs_from_rules_mk(current_rules_mk)
     for subdir in subdir_list:
@@ -282,7 +279,6 @@ def search_depth_first(current_dir, filename_upper):
             targets = search_depth_first(subdir_path, filename_upper)
             if targets:
                 return targets  # Return immediately upon finding match in subdir
-    
     return []
 
 
@@ -296,7 +292,7 @@ def read_and_filter_rules_mk(source_names):
     source_path = Path(source_names[0])
     filename_upper = source_path.name.upper()
     build_targets = []
-    
+
     # Check if source_path is just a filename (no directory component)
     if source_path.parent == Path('.'):
         build_targets = search_depth_first(Path.cwd(), filename_upper)
@@ -305,7 +301,7 @@ def read_and_filter_rules_mk(source_names):
         if not rules_mk_path.exists():
             raise FileNotFoundError(f"No Rules.mk found at {rules_mk_path}")
         build_targets = parse_rules_mk_for_targets(rules_mk_path, filename_upper, show_location=False, first_only=False)
-    
+
     # Single error message for both cases
     if not build_targets:
         raise ValueError(f"No target found in Rules.mk for source file '{source_path.name}'")
