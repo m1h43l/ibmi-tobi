@@ -233,7 +233,9 @@ COLOR_TTY := {'true' if self.color else 'false'}
               f"{len(self.success_targets) + len(self.failed_targets)} total")
         if self.failed_targets:
             print(" > Failed objects:   ", " ".join(self.failed_targets))
-        print(colored("Build Completed!", Colors.BOLD))
+            print(colored("Build Failed!", Colors.FAIL))
+        elif self.success_targets:
+            print(colored("Build Successful!", Colors.OKGREEN))
         # event_files = list(Path(".evfevent").rglob("*.evfevent"))
 
         # def replace_abs_path(line: str) -> str:
